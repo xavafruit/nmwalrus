@@ -221,7 +221,7 @@ function refreshData(){
     updateBuyPrice()
     updateSellPrice()
     var prldoc=document.getElementById('playerreflink')
-    prldoc.textContent=window.location.origin+"/AVAXMiner/?ref="+currentAddr
+    prldoc.textContent=window.location.origin+"/matic/?ref="+currentAddr
     var copyText = document.getElementById("copytextthing");
     copyText.value=prldoc.textContent
 }
