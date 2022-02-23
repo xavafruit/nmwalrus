@@ -10,37 +10,115 @@ var modalID=0
 var baseNum = '';
 var currentAddr = '';
 
-loginbtn.addEventListener('click', async function() {
+
+const networks = {
+    polygon: {
+      chainId: `0x${Number(137).toString(16)}`,
+      chainName: "Polygon Mainnet",
+      nativeCurrency: {
+        name: "MATIC",
+        symbol: "MATIC",
+        decimals: 18
+      },
+      rpcUrls: ["https://polygon-rpc.com/"],
+      blockExplorerUrls: ["https://polygonscan.com/"]
+    },
+    AVAX: {
+        chainId: `0x${Number(43144).toString(16)}`,
+        chainName: "Avalanche",
+        nativeCurrency: {
+          name: "AVAX",
+          symbol: "AVAX",
+          decimals: 18
+        },
+        rpcUrls: ["https://api.avax.network/ext/bc/C/rpc"],
+        blockExplorerUrls: ["https://snowtrace.io/"]
+      },
+      
+
+
+
+};
+
+
+
+window.userWalletAddress = null
+
+
+const loginButton = document.getElementById('loginbtn')
+function toggleButton() {
+    if (!window.ethereum) {
+        
+        loginButton.innerText = "MetaMask is not installed"
+        return false
+        
+    }
+   
+
+    loginButton.addEventListener('click', mmlogin)
+  
+   
+      
+    
+
+}
+
+
+async function mmlogin() {
+    
     if (window.ethereum) {
       window.web3 = new Web3(ethereum);
+      
       try {
         await ethereum.enable() // Request access
+        
         minersContract =await new web3.eth.Contract(minersAbi, minersAddr)
         let accounts = await web3.eth.getAccounts()
-        currentAddr = accounts[0]    
+        currentAddr = accounts[0]  
+        
+        //loginButton.innerText = 'Disconnect'
+        if (!accounts) {return}
+            window.userWalletAdress = accounts[0]
+            loginButton.innerText = 'Disconnect'
+    
+            loginButton.removeEventListener('click', mmlogin)
+            setTimeout(() => {
+            loginButton.addEventListener('click', () => { signOut() })
+            
+        }, 200)    
         setTimeout(function(){
             controlLoop()
             controlLoopFaster()
         },1000);
-      } catch (error) {
+        window.userWalletAdress = accounts[0]
+       
+      } catch (error) { 
           // User denied account access...
           console.error(error)
-      }
+      } 
     }
     // Legacy dapp browsers...
-    else if (window.web3) {
-      window.web3 = new Web3(web3.currentProvider);
-      minersContract = await new web3.eth.Contract(minersAbi, minersAddr)
-      let accounts = await web3.eth.getAccounts()
-      currentAddr = accounts[0]  
-      setTimeout(function(){
-          controlLoop()
-          controlLoopFaster()
-      },1000);
-    } 
-    
+   
     setTimeout(checkForBinanceChain, 1500)
-})
+
+}
+
+function signOut() {
+    window.userWalletAdress = null
+    loginButton.innerText = 'Connect'
+
+    loginButton.removeEventListener('click', signOut)
+    setTimeout(() => {
+        loginButton.addEventListener('click', mmlogin)
+        
+    }, 200)    
+
+
+}
+window.addEventListener('DOMContentLoaded', (event) => {
+    
+    toggleButton()
+});
 
 async function checkForBinanceChain() {
     await BinanceChain.enable()
@@ -93,12 +171,12 @@ function refreshData(){
     var baseNum = 0;
     contractBalance(function(result){
         rawStr = numberWithCommas(Number(result).toFixed(3));
-        balanceElem.textContent = 'There is ' + stripDecimals(rawStr, 3) + ' FTM in the mine';
+        balanceElem.textContent = 'There is ' + stripDecimals(rawStr, 3) + ' AVAX in the mine';
     });
     
     web3.eth.getBalance(currentAddr).then(result => {
         rawStr = numberWithCommas(Number(web3.utils.fromWei(result)).toFixed(3));
-        document.getElementById('userTrx').textContent = stripDecimals(rawStr, 3) + ' FTM';
+        document.getElementById('userTrx').textContent = stripDecimals(rawStr, 3) + 'AVAX';
     }).catch((err) => {
         console.log(err)
     });
@@ -136,14 +214,14 @@ function refreshData(){
         var sellsforexampledoc=document.getElementById('sellsforexample')
         calculateEggBuySimple(web3.utils.toWei('0.1'),function(eggs){
             devFee(eggs,function(fee){
-                sellsforexampledoc.textContent='0.1 FTM Hires ' + formatEggs(eggs-fee) + ' miners';
+                sellsforexampledoc.textContent='0.1 AVAX Hires ' + formatEggs(eggs-fee) + ' miners';
             });
         });
     });
     updateBuyPrice()
     updateSellPrice()
     var prldoc=document.getElementById('playerreflink')
-    prldoc.textContent=window.location.origin+"/fantom/?ref="+currentAddr
+    prldoc.textContent=window.location.origin+"/AVAXMiner/?ref="+currentAddr
     var copyText = document.getElementById("copytextthing");
     copyText.value=prldoc.textContent
 }

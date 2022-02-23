@@ -12,36 +12,58 @@ var currentAddr = '';
 
 window.addEventListener('load', async function() {
     if (window.ethereum) {
-        console.log(calculateEggSell)
       window.web3 = new Web3(ethereum);
+      
       try {
         await ethereum.enable() // Request access
+        
         minersContract =await new web3.eth.Contract(minersAbi, minersAddr)
         let accounts = await web3.eth.getAccounts()
-        currentAddr = accounts[0]    
+        currentAddr = accounts[0]  
+        
+        //loginButton.innerText = 'Disconnect'
+        if (!accounts) {return}
+            window.userWalletAdress = accounts[0]
+            loginButton.innerText = 'Disconnect'
+    
+            loginButton.removeEventListener('click', mmlogin)
+            setTimeout(() => {
+            loginButton.addEventListener('click', () => { signOut() })
+            
+        }, 200)    
         setTimeout(function(){
             controlLoop()
             controlLoopFaster()
         },1000);
-      } catch (error) {
+        window.userWalletAdress = accounts[0]
+       
+      } catch (error) { 
           // User denied account access...
           console.error(error)
-      }
+      } 
     }
     // Legacy dapp browsers...
-    else if (window.web3) {
-      window.web3 = new Web3(web3.currentProvider);
-      minersContract = await new web3.eth.Contract(minersAbi, minersAddr)
-      let accounts = await web3.eth.getAccounts()
-      currentAddr = accounts[0]  
-      setTimeout(function(){
-          controlLoop()
-          controlLoopFaster()
-      },1000);
-    } 
-    
+   
     setTimeout(checkForBinanceChain, 1500)
-})
+
+}
+
+function signOut() {
+    window.userWalletAdress = null
+    loginButton.innerText = 'Connect'
+
+    loginButton.removeEventListener('click', signOut)
+    setTimeout(() => {
+        loginButton.addEventListener('click', mmlogin)
+        
+    }, 200)    
+
+
+}
+window.addEventListener('DOMContentLoaded', (event) => {
+    
+    toggleButton()
+});
 
 async function checkForBinanceChain() {
     await BinanceChain.enable()
@@ -99,7 +121,7 @@ function refreshData(){
     
     web3.eth.getBalance(currentAddr).then(result => {
         rawStr = numberWithCommas(Number(web3.utils.fromWei(result)).toFixed(3));
-        document.getElementById('userTrx').textContent = 'You have ' + stripDecimals(rawStr, 3) + ' AVAX in your wallet';
+        document.getElementById('userTrx').textContent = stripDecimals(rawStr, 3) + 'AVAX';
     }).catch((err) => {
         console.log(err)
     });
@@ -195,8 +217,10 @@ function updateBuyPrice(){
     var eggstobuydoc=document.getElementById('eggstobuy')
     var trxspenddoc=document.getElementById('ethtospend')
     calculateEggBuySimple(web3.utils.toWei(trxspenddoc.value),function(eggs){
+        console.log(eggs)
         devFee(eggs,function(fee){
             eggstobuydoc.textContent=formatEggs((eggs-fee)/3.3)
+            console.log(fee)
         });
     });
 }
@@ -417,7 +441,7 @@ function translateQuantity(quantity,precision){
       return (quantity).toFixed(2)
     }
 
-    //console.log('??quantity ',typeof quantity)
+    console.log('??quantity ',typeof quantity)
     if(quantity>1000000){
         modifier=' Million'
         finalquantity=quantity/1000000
