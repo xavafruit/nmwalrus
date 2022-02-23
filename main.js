@@ -10,7 +10,62 @@ var modalID=0
 var baseNum = '';
 var currentAddr = '';
 
-window.addEventListener('load', async function() {
+
+const networks = {
+    polygon: {
+      chainId: `0x${Number(137).toString(16)}`,
+      chainName: "Polygon Mainnet",
+      nativeCurrency: {
+        name: "MATIC",
+        symbol: "MATIC",
+        decimals: 18
+      },
+      rpcUrls: ["https://polygon-rpc.com/"],
+      blockExplorerUrls: ["https://polygonscan.com/"]
+    },
+    AVAX: {
+        chainId: `0x${Number(43144).toString(16)}`,
+        chainName: "Avalanche",
+        nativeCurrency: {
+          name: "AVAX",
+          symbol: "AVAX",
+          decimals: 18
+        },
+        rpcUrls: ["https://api.avax.network/ext/bc/C/rpc"],
+        blockExplorerUrls: ["https://snowtrace.io/"]
+      },
+      
+
+
+
+};
+
+
+
+window.userWalletAddress = null
+
+
+const loginButton = document.getElementById('loginbtn')
+function toggleButton() {
+    if (!window.ethereum) {
+        
+        loginButton.innerText = "MetaMask is not installed"
+        return false
+        
+    }
+   
+
+    loginButton.addEventListener('click', mmlogin)
+  
+   
+      
+    
+
+}
+
+
+async function mmlogin() {
+    
     if (window.ethereum) {
       window.web3 = new Web3(ethereum);
       
